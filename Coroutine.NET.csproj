@@ -4,4 +4,12 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="Segment\" />
+    <None Remove="Segment\Concurrent\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Segment\" />
+    <Folder Include="Segment\Concurrent\" />
+  </ItemGroup>
 </Project>
