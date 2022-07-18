@@ -23,9 +23,9 @@ namespace Segment.Concurrent
             _context.Post(state => { block(); }, null);
         }
 
-        public void Launch(Dispatcher dispatcher, Func<Task> block)
+        public Task Launch(Dispatcher dispatcher, Func<Task> block)
         {
-            dispatcher.Post(_ =>
+            return dispatcher.Post(_ =>
             {
                 block().Start();
             }, _context);

@@ -13,9 +13,9 @@ namespace Segment.Concurrent
             _factory = new TaskFactory(scheduler);
         }
 
-        public void Post(Action<object> action, SynchronizationContext context)
+        public Task Post(Action<object> action, SynchronizationContext context)
         {
-            _factory.StartNew(action, context);
+            return _factory.StartNew(action, context);
         }
 
         public async Task Send(Func<object, Task> func, SynchronizationContext context)
