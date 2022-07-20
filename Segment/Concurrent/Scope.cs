@@ -25,9 +25,9 @@ namespace Segment.Concurrent
 
         public Task Launch(Dispatcher dispatcher, Func<Task> block)
         {
-            return dispatcher.Post(async _ =>
+            return dispatcher.Post(_ =>
             {
-                await block();
+                block();
             }, _context);
         }
 
