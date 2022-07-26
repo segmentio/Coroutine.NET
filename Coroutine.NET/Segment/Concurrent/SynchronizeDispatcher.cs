@@ -4,29 +4,32 @@ using System.Threading.Tasks;
 
 namespace Segment.Concurrent
 {
-    public class SynchronizeDispatcher : Dispatcher
+    public class SynchronizeDispatcher : IDispatcher
     {
-        public SynchronizeDispatcher(TaskScheduler scheduler) : base(scheduler)
+        private readonly TaskScheduler _scheduler;
+        
+        public SynchronizeDispatcher()
         {
+            _scheduler = new LimitedConcurrencyLevelTaskScheduler(Environment.ProcessorCount);
         }
 
-        public override Task Post(Action<object> action, SynchronizationContext context)
+        public Task Post(Action<object> action, SynchronizationContext context)
         {
-            var task = base.Post(action, context);
+            var task = new Task(action, context);
+            task.RunSynchronously(_scheduler);
+            return task;
+        }
+
+        public Task Send(Func<object, Task> func, SynchronizationContext context)
+        {
+            var task = new Task(_ => { func(context);}, context);
             task.RunSynchronously();
             return task;
         }
 
-        public override Task Send(Func<object, Task> func, SynchronizationContext context)
+        public Task<T> Async<T>(Func<object, T> func, SynchronizationContext context)
         {
-            var task = base.Send(func, context);
-            task.RunSynchronously();
-            return task;
-        }
-
-        public override Task<T> Async<T>(Func<object, T> func, SynchronizationContext context)
-        {
-            var task = base.Async(func, context);
+            var task = new Task<T>(func, context);
             task.RunSynchronously();
             return task;
         }
