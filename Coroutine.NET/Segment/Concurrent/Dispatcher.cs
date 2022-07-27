@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Segment.Concurrent
 {
-    public class Dispatcher
+    public class Dispatcher: IDispatcher
     {
         private readonly TaskFactory _factory;
 

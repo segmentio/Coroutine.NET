@@ -9,7 +9,7 @@
     
     <Authors>Segment, Inc</Authors>
     <Description>Use .net async/await with coroutine style</Description>
-    <Version>0.4.0</Version>
+    <Version>0.5.0</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/segmentio/Coroutine.NET</RepositoryUrl>
     <RepositoryType>git</RepositoryType>

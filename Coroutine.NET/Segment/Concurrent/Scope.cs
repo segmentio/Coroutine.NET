@@ -23,7 +23,7 @@ namespace Segment.Concurrent
             _context.Post(state => { block(); }, null);
         }
 
-        public Task Launch(Dispatcher dispatcher, Func<Task> block)
+        public Task Launch(IDispatcher dispatcher, Func<Task> block)
         {
             return dispatcher.Post(_ =>
             {
@@ -31,7 +31,7 @@ namespace Segment.Concurrent
             }, _context);
         }
 
-        public Task Launch(Dispatcher dispatcher, Action block)
+        public Task Launch(IDispatcher dispatcher, Action block)
         {
             return dispatcher.Post(_ =>
             {
@@ -39,18 +39,27 @@ namespace Segment.Concurrent
             }, _context);
         }
 
-        public async Task<T> Async<T>(Dispatcher dispatcher, Func<T> block)
+        public async Task<T> Async<T>(IDispatcher dispatcher, Func<T> block)
         {
             var result = await dispatcher.Async(_ => block(), _context);
             return result;
         }
 
-        public static async Task WithContext(Dispatcher dispatcher, Func<Task> block)
+        public static async Task WithContext(IDispatcher dispatcher, Func<Task> block)
         {
             var context = SynchronizationContext.Current;
             await dispatcher.Send(async (_) =>
             {
                 await block();
+            }, context);
+        }
+
+        public static async Task WithContext(IDispatcher dispatcher, Action block)
+        {
+            var context = SynchronizationContext.Current;
+            await dispatcher.Post( _ =>
+            {
+                block();
             }, context);
         }
     }
