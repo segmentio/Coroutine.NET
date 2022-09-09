@@ -13,21 +13,21 @@ namespace Segment.Concurrent
             _scheduler = new LimitedConcurrencyLevelTaskScheduler(Environment.ProcessorCount);
         }
 
-        public Task Post(Action<object> action, SynchronizationContext context)
+        public Task Post(Action<object> action, SynchronizationContext context, ICoroutineExceptionHandler handler = default)
         {
             var task = new Task(action, context);
             task.RunSynchronously(_scheduler);
             return task;
         }
 
-        public Task Send(Func<object, Task> func, SynchronizationContext context)
+        public Task Send(Func<object, Task> func, SynchronizationContext context, ICoroutineExceptionHandler handler = default)
         {
             var task = new Task(_ => { func(context);}, context);
             task.RunSynchronously();
             return task;
         }
 
-        public Task<T> Async<T>(Func<object, T> func, SynchronizationContext context)
+        public Task<T> Async<T>(Func<object, T> func, SynchronizationContext context, ICoroutineExceptionHandler handler = default)
         {
             var task = new Task<T>(func, context);
             task.RunSynchronously();
