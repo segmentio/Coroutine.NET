@@ -35,7 +35,20 @@ namespace Tests
             
             Assert.True(called);
         }
+        
+        [Fact]
+        public async Task TestLaunchWithNoDispatcher()
+        {
+            var called = false;
+            scope.Launch(async () =>
+            {
+                called = true;
+            });
 
+            await Task.Delay(500);
+            Assert.True(called);
+        }
+        
         [Fact]
         public async Task TestAsyncAsync()
         {
