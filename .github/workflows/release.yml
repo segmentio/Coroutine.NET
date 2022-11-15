@@ -15,6 +15,13 @@ jobs:
       - name: Get tag
         id: vars
         run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+      - name: Verify tag
+        run: |
+          VERSION=$(grep '<Version>' Coroutine.NET/Coroutine.NET.csproj | sed "s@.*<Version>\(.*\)</Version>.*@\1@")
+          if [ "${{ steps.vars.outputs.tag }}" != "$VERSION" ]; then {
+            echo "Tag ${{ steps.vars.outputs.tag }} does not match the package version ($VERSION)"
+            exit 1
+          } fi
       - name: Setup .NET Core SDK
         uses: actions/setup-dotnet@v2
         with:
