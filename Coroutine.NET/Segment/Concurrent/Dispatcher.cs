@@ -25,7 +25,7 @@ namespace Segment.Concurrent
 
         public async Task Send(Func<object, Task> func, SynchronizationContext context, ICoroutineExceptionHandler handler = default)
         {
-            await _factory.StartNew(func, context)
+            await _factory.StartNew(func, context).Unwrap()
                 .ContinueWith(o =>
                 {
                     if (!o.IsFaulted || o.Exception == null) return;
@@ -35,7 +35,7 @@ namespace Segment.Concurrent
 
         public async Task<T> Async<T>(Func<object, T> func, SynchronizationContext context, ICoroutineExceptionHandler handler = default)
         {
-            var result = await _factory.StartNew(func, context).ContinueWith<T>(o =>
+            var result = await _factory.StartNew(func, context).ContinueWith(o =>
             {
                 if (!o.IsFaulted || o.Exception == null) return o.Result;
                 
