@@ -3,13 +3,13 @@ using System.Threading;
 
 namespace Segment.Concurrent
 {
-    public class SupervisedSynchronizationContext: SynchronizationContext
+    public class SupervisedSynchronizationContext : SynchronizationContext
     {
-        internal readonly ICoroutineExceptionHandler ExceptionHandler;
+        internal readonly ICoroutineExceptionHandler _exceptionHandler;
 
         public SupervisedSynchronizationContext(ICoroutineExceptionHandler exceptionHandler = default)
         {
-            ExceptionHandler = exceptionHandler;
+            _exceptionHandler = exceptionHandler;
         }
 
         public override void Send(SendOrPostCallback d, object state)
@@ -20,7 +20,7 @@ namespace Segment.Concurrent
             }
             catch (Exception e)
             {
-                ExceptionHandler?.OnExceptionThrown(e);
+                _exceptionHandler?.OnExceptionThrown(e);
             }
         }
 
@@ -32,7 +32,7 @@ namespace Segment.Concurrent
             }
             catch (Exception e)
             {
-                ExceptionHandler?.OnExceptionThrown(e);
+                _exceptionHandler?.OnExceptionThrown(e);
             }
         }
     }

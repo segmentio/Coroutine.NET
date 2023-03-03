@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Segment.Concurrent
 {
-    public class Dispatcher: IDispatcher
+    public class Dispatcher : IDispatcher
     {
         private readonly TaskFactory _factory;
 
@@ -35,10 +35,10 @@ namespace Segment.Concurrent
 
         public async Task<T> Async<T>(Func<object, T> func, SynchronizationContext context, ICoroutineExceptionHandler handler = default)
         {
-            var result = await _factory.StartNew(func, context).ContinueWith(o =>
+            T result = await _factory.StartNew(func, context).ContinueWith(o =>
             {
                 if (!o.IsFaulted || o.Exception == null) return o.Result;
-                
+
                 handler?.OnExceptionThrown(o.Exception);
                 return default;
 

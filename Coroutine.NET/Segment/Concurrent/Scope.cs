@@ -12,8 +12,8 @@ namespace Segment.Concurrent
 
         public Scope(ICoroutineExceptionHandler exceptionHandler = default)
         {
-            _context = exceptionHandler == null ? 
-                new SynchronizationContext() : 
+            _context = exceptionHandler == null ?
+                new SynchronizationContext() :
                 new SupervisedSynchronizationContext(exceptionHandler);
             _exceptionHandler = exceptionHandler;
         }
@@ -24,7 +24,7 @@ namespace Segment.Concurrent
 
             if (context is SupervisedSynchronizationContext supervisedSynchronizationContext)
             {
-                _exceptionHandler = supervisedSynchronizationContext.ExceptionHandler;
+                _exceptionHandler = supervisedSynchronizationContext._exceptionHandler;
             }
         }
 
@@ -51,19 +51,19 @@ namespace Segment.Concurrent
 
         public async Task<T> Async<T>(IDispatcher dispatcher, Func<T> block)
         {
-            var result = await dispatcher.Async(_ => block(), _context, _exceptionHandler);
+            T result = await dispatcher.Async(_ => block(), _context, _exceptionHandler);
             return result;
         }
 
         public static async Task WithContext(IDispatcher dispatcher, Func<Task> block)
         {
-            var context = SynchronizationContext.Current;
+            SynchronizationContext context = SynchronizationContext.Current;
             ICoroutineExceptionHandler exceptionHandler = default;
             if (context is SupervisedSynchronizationContext supervisedSynchronizationContext)
             {
-                exceptionHandler = supervisedSynchronizationContext.ExceptionHandler;
+                exceptionHandler = supervisedSynchronizationContext._exceptionHandler;
             }
-            
+
             await dispatcher.Send(async (_) =>
             {
                 await block();
@@ -72,8 +72,8 @@ namespace Segment.Concurrent
 
         public static async Task WithContext(IDispatcher dispatcher, Action block)
         {
-            var context = SynchronizationContext.Current;
-            await dispatcher.Post( _ =>
+            SynchronizationContext context = SynchronizationContext.Current;
+            await dispatcher.Post(_ =>
             {
                 block();
             }, context);

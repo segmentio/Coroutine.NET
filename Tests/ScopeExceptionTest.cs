@@ -7,11 +7,11 @@ namespace Tests
 {
     public class ScopeExceptionTest
     {
-        private ExceptionHandler handler;
+        private readonly ExceptionHandler handler;
 
-        private Scope scope;
+        private readonly Scope scope;
 
-        private IDispatcher dispatcher;
+        private readonly IDispatcher dispatcher;
 
         public ScopeExceptionTest()
         {
@@ -26,7 +26,7 @@ namespace Tests
             await scope.Launch(dispatcher, () => throw new Exception());
             Assert.True(handler.ExcpetionCaught);
         }
-        
+
         [Fact]
         public async Task TestLaunch()
         {
@@ -34,11 +34,11 @@ namespace Tests
             await Task.Delay(500);
             Assert.True(handler.ExcpetionCaught);
         }
-        
+
         [Fact]
         public async Task TestLaunchWithNoDispatcher()
         {
-            scope.Launch( () => throw new Exception());
+            scope.Launch(() => throw new Exception());
             await Task.Delay(500);
             Assert.True(handler.ExcpetionCaught);
         }
@@ -46,7 +46,7 @@ namespace Tests
         [Fact]
         public async Task TestAsyncAsync()
         {
-            var called = false;
+            bool called = false;
             await scope.Launch(dispatcher, async () =>
             {
                 called = await scope.Async<bool>(dispatcher, () => throw new Exception());
@@ -54,11 +54,11 @@ namespace Tests
             await Task.Delay(500);
             Assert.True(handler.ExcpetionCaught);
         }
-        
+
         [Fact]
         public async Task TestAsync()
         {
-            var called = false;
+            bool called = false;
             scope.Launch(dispatcher, async () =>
             {
                 called = await scope.Async<bool>(dispatcher, () => throw new Exception());
@@ -78,7 +78,7 @@ namespace Tests
         });
 
         [Fact]
-        public void TestWithContext() => scope.Launch( async () =>
+        public void TestWithContext() => scope.Launch(async () =>
         {
             scope.Launch(dispatcher, async () =>
             {
@@ -93,7 +93,7 @@ namespace Tests
     class ExceptionHandler : ICoroutineExceptionHandler
     {
         public bool ExcpetionCaught = false;
-        
+
         public void OnExceptionThrown(Exception e)
         {
             ExcpetionCaught = true;
