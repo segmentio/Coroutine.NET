@@ -7,7 +7,7 @@ namespace Segment.Concurrent
     public class SynchronizeDispatcher : IDispatcher
     {
         private readonly TaskScheduler _scheduler;
-        
+
         public SynchronizeDispatcher()
         {
             _scheduler = new LimitedConcurrencyLevelTaskScheduler(Environment.ProcessorCount);
@@ -22,7 +22,7 @@ namespace Segment.Concurrent
 
         public Task Send(Func<object, Task> func, SynchronizationContext context, ICoroutineExceptionHandler handler = default)
         {
-            var task = new Task(_ => { func(context);}, context);
+            var task = new Task(_ => { func(context); }, context);
             task.RunSynchronously();
             return task;
         }

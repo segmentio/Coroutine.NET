@@ -6,101 +6,101 @@ namespace Tests
 {
     public class ScopeTest
     {
-        private Scope scope = new Scope();
-        
-        private IDispatcher dispatcher = new Dispatcher(new LimitedConcurrencyLevelTaskScheduler(1));
-        
-        private IDispatcher syncDispatcher = new SynchronizeDispatcher();
-        
+        private readonly Scope _scope = new Scope();
+
+        private readonly IDispatcher _dispatcher = new Dispatcher(new LimitedConcurrencyLevelTaskScheduler(1));
+
+        private readonly IDispatcher _syncDispatcher = new SynchronizeDispatcher();
+
         [Fact]
         public async Task TestLaunchAsync()
         {
-            var called = false;
-            await scope.Launch(dispatcher, () =>
+            bool called = false;
+            await _scope.Launch(_dispatcher, () =>
             {
                 called = true;
             });
-            
+
             Assert.True(called);
         }
-        
+
         [Fact]
         public void TestLaunch()
         {
-            var called = false;
-            scope.Launch(syncDispatcher, () =>
+            bool called = false;
+            _scope.Launch(_syncDispatcher, () =>
             {
                 called = true;
             });
-            
+
             Assert.True(called);
         }
-        
+
         [Fact]
         public async Task TestLaunchWithNoDispatcher()
         {
-            var called = false;
-            scope.Launch(async () =>
-            {
+            bool called = false;
+            _scope.Launch(() => {
                 called = true;
+                return Task.CompletedTask;
             });
 
             await Task.Delay(500);
             Assert.True(called);
         }
-        
+
         [Fact]
         public async Task TestAsyncAsync()
         {
-            var called = false;
-            await scope.Launch(dispatcher, async () =>
+            bool called = false;
+            await _scope.Launch(_dispatcher, async () =>
             {
-                called = await scope.Async(syncDispatcher, () => true);
+                called = await _scope.Async(_syncDispatcher, () => true);
             });
-            
+
             Assert.True(called);
         }
-        
+
         [Fact]
         public void TestAsync()
         {
-            var called = false;
-            scope.Launch(syncDispatcher, async () =>
+            bool called = false;
+            _scope.Launch(_syncDispatcher, async () =>
             {
-                called = await scope.Async(syncDispatcher, () => true);
+                called = await _scope.Async(_syncDispatcher, () => true);
             });
-            
+
             Assert.True(called);
         }
 
         [Fact]
         public async Task TestWithContextAsync()
-        {   
-            var called = false;
-            
-            await Scope.WithContext(dispatcher, async () =>
+        {
+            bool called = false;
+
+            await Scope.WithContext(_dispatcher, async () =>
             {
-                await scope.Launch(dispatcher, () =>
+                await _scope.Launch(_dispatcher, () =>
                 {
                     called = true;
                 });
             });
-            
+
             Assert.True(called);
         }
-        
+
         [Fact]
         public void TestWithContext()
-        {   
-            var called = false;
-            scope.Launch(syncDispatcher, async () =>
+        {
+            bool called = false;
+            _scope.Launch(_syncDispatcher, async () =>
             {
-                await Scope.WithContext(syncDispatcher, () =>
+                await Scope.WithContext(_syncDispatcher, () =>
                 {
                     called = true;
                 });
             });
-            
+
             Assert.True(called);
         }
     }
