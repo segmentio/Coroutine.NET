@@ -57,39 +57,45 @@ namespace Segment.Concurrent
         /// <summary>
         /// Informs the ThreadPool that there's work to be executed for this scheduler.
         /// </summary>
-        private void NotifyThreadPoolOfPendingWork() => ThreadPool.QueueUserWorkItem(_ =>
+        private void NotifyThreadPoolOfPendingWork()
         {
-            // Note that the current thread is now processing work items.
-            // This is necessary to enable inlining of tasks into this thread.
-            s_currentThreadIsProcessingItems = true;
-            try
+            Task.Run(() =>
             {
-                // Process all available items in the queue.
-                while (true)
+                // Note that the current thread is now processing work items.
+                // This is necessary to enable inlining of tasks into this thread.
+                s_currentThreadIsProcessingItems = true;
+                try
                 {
-                    Task item;
-                    lock (_tasks)
+                    // Process all available items in the queue.
+                    while (true)
                     {
-                        // When there are no more items to be processed,
-                        // note that we're done processing, and get out.
-                        if (_tasks.Count == 0)
+                        Task item;
+                        lock (_tasks)
                         {
-                            --_delegatesQueuedOrRunning;
-                            break;
+                            // When there are no more items to be processed,
+                            // note that we're done processing, and get out.
+                            if (_tasks.Count == 0)
+                            {
+                                --_delegatesQueuedOrRunning;
+                                break;
+                            }
+
+                            // Get the next item from the queue
+                            item = _tasks.First.Value;
+                            _tasks.RemoveFirst();
                         }
 
-                        // Get the next item from the queue
-                        item = _tasks.First.Value;
-                        _tasks.RemoveFirst();
+                        // Execute the task we pulled out of the queue
+                        TryExecuteTask(item);
                     }
-
-                    // Execute the task we pulled out of the queue
-                    TryExecuteTask(item);
                 }
-            }
-            // We're done processing items on the current thread
-            finally { s_currentThreadIsProcessingItems = false; }
-        }, null);
+                // We're done processing items on the current thread
+                finally
+                {
+                    s_currentThreadIsProcessingItems = false;
+                }
+            });
+        }
 
         /// <summary>Attempts to execute the specified task on the current thread.</summary>
         /// <param name="task">The task to be executed.</param>
