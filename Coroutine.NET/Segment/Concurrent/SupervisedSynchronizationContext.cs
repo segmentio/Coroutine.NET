@@ -14,6 +14,9 @@ namespace Segment.Concurrent
 
         public override void Send(SendOrPostCallback d, object state)
         {
+            SynchronizationContext previous = Current;
+            SetSynchronizationContext(this);
+
             try
             {
                 d(state);
@@ -22,10 +25,15 @@ namespace Segment.Concurrent
             {
                 _exceptionHandler?.OnExceptionThrown(e);
             }
+
+            SetSynchronizationContext(previous);
         }
 
         public override void Post(SendOrPostCallback d, object state)
         {
+            SynchronizationContext previous = Current;
+            SetSynchronizationContext(this);
+
             try
             {
                 d(state);
@@ -34,6 +42,8 @@ namespace Segment.Concurrent
             {
                 _exceptionHandler?.OnExceptionThrown(e);
             }
+
+            SetSynchronizationContext(previous);
         }
     }
 

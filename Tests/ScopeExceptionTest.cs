@@ -68,26 +68,33 @@ namespace Tests
         }
 
         [Fact]
-        public void TestWithContextAsync() => scope.Launch(async () =>
+        public async Task TestWithContextAsync()
         {
-            await Scope.WithContext(dispatcher,
-                async () => { await scope.Launch(dispatcher, () => throw new Exception()); });
-
+            scope.Launch(async () =>
+            {
+                await Scope.WithContext(dispatcher,
+                    async () =>
+                    {
+                        await Task.Delay(100);
+                        throw new Exception();
+                    });
+            });
             await Task.Delay(500);
             Assert.True(handler.ExcpetionCaught);
-        });
+        }
 
         [Fact]
-        public void TestWithContext() => scope.Launch(async () =>
+        public async Task TestWithContext()
         {
-            scope.Launch(dispatcher, async () =>
+            scope.Launch(async () =>
             {
-                await Scope.WithContext(dispatcher, () => throw new Exception());
+                scope.Launch(dispatcher,
+                    async () => { await Scope.WithContext(dispatcher, () => throw new Exception()); });
             });
 
             await Task.Delay(500);
             Assert.True(handler.ExcpetionCaught);
-        });
+        }
     }
 
     class ExceptionHandler : ICoroutineExceptionHandler
