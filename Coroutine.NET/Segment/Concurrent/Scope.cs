@@ -37,7 +37,12 @@ namespace Segment.Concurrent
         {
             return dispatcher.Post(_ =>
             {
+                SynchronizationContext previous = SynchronizationContext.Current;
+                SynchronizationContext.SetSynchronizationContext(_context);
+
                 block();
+
+                SynchronizationContext.SetSynchronizationContext(previous);
             }, _context, _exceptionHandler);
         }
 
@@ -45,13 +50,27 @@ namespace Segment.Concurrent
         {
             return dispatcher.Post(_ =>
             {
+                SynchronizationContext previous = SynchronizationContext.Current;
+                SynchronizationContext.SetSynchronizationContext(_context);
+
                 block();
+
+                SynchronizationContext.SetSynchronizationContext(previous);
             }, _context, _exceptionHandler);
         }
 
         public async Task<T> Async<T>(IDispatcher dispatcher, Func<T> block)
         {
-            T result = await dispatcher.Async(_ => block(), _context, _exceptionHandler);
+            T result = await dispatcher.Async(_ =>
+            {
+                SynchronizationContext previous = SynchronizationContext.Current;
+                SynchronizationContext.SetSynchronizationContext(_context);
+
+                T r = block();
+
+                SynchronizationContext.SetSynchronizationContext(previous);
+                return r;
+            }, _context, _exceptionHandler);
             return result;
         }
 
@@ -73,10 +92,15 @@ namespace Segment.Concurrent
         public static async Task WithContext(IDispatcher dispatcher, Action block)
         {
             SynchronizationContext context = SynchronizationContext.Current;
+            ICoroutineExceptionHandler exceptionHandler = default;
+            if (context is SupervisedSynchronizationContext supervisedSynchronizationContext)
+            {
+                exceptionHandler = supervisedSynchronizationContext._exceptionHandler;
+            }
             await dispatcher.Post(_ =>
             {
                 block();
-            }, context);
+            }, context, exceptionHandler);
         }
     }
 }
